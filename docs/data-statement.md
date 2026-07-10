@@ -4,7 +4,13 @@ Records the provenance, rights, and verification of every piece of geospatial da
 to build the Great Zimbabwe 3D scene. Companion document: [method-terrain-from-dem.md](method-terrain-from-dem.md)
 (how the data was turned into a Unity terrain).
 
-Last updated: 2026-07-05.
+> **The other half of the data story** — the curated factual corpus that grounds the AI
+> guide's answers — lives in [`Dataset/`](../Dataset/README.md): per-source provenance
+> files, a license ledger (`Dataset/LICENSES.md`), and an automated integrity audit
+> (`py Dataset/audit_provenance.py`).
+
+Last updated: 2026-07-10 (terrain content unchanged since 2026-07-05; added the
+knowledge-base cross-reference above).
 
 ## 1. Primary source
 
