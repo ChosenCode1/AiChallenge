@@ -157,7 +157,8 @@ public class GZLocalLLMBackend : GZNpcBackend
         sb.AppendLine("  view: \"high\" | \"normal\" | \"low\" | \"close\" — how the camera should sit. Prefer \"high\" for wide context, \"low\" only for ground activity like the cattle.");
         sb.AppendLine("  orbit: \"slow\" | \"normal\" | \"fast\".");
         sb.AppendLine("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists.");
-        sb.AppendLine("Ground every claim ONLY in the facts below. If the facts don't cover the question, say so briefly and share the nearest relevant fact.");
+        sb.AppendLine("Ground every claim ONLY in the facts below — never answer from anything else.");
+        sb.AppendLine("FIRST check: do the facts below answer the visitor's question? If they do not (practical or modern-day questions like tickets, wifi, opening hours, food), the narration MUST begin with exactly: \"That I don't know — the histories I carry don't speak of it.\" Then offer one nearby fact. Never ignore the question and never invent an answer.");
         sb.AppendLine();
         sb.AppendLine("FACTS BY PLACE:");
         if (req.pois != null)

@@ -149,6 +149,10 @@ A `GreatZimbabwe_Mobile` scene variant with pre-baked terrain targets lower-end 
   narration cue matcher. Run via *Window ▸ General ▸ Test Runner*, or headless:
   `Unity -batchmode -projectPath . -runTests -testPlatform EditMode`.
 - **Provenance audit**: `py Dataset/audit_provenance.py` — the knowledge-base integrity suite.
+- **Live end-to-end verification**: `py Tools/e2e_llm_probe.py` (with the local server
+  running) replicates the Unity request byte-for-byte and checks the steering protocol,
+  grounding, and the "I don't know" refusal against the live model. Latest verified
+  transcript and measured performance: [docs/llm-e2e-verification.md](docs/llm-e2e-verification.md).
 
 Dev tooling note: `com.unity.pipeline` in the package manifest supports our automated
 batch-mode build/test workflow during development; `Packages/packages-lock.json` pins all
@@ -167,7 +171,8 @@ Honesty over polish — these are the current rough spots:
 - **Two-part kiosk install** in live mode: the Unity app plus a local model server. Scripted
   mode is a single app.
 - **Latency is model-bound.** Answers stream token-by-token; speed depends on the host
-  machine. We report measured throughput rather than promising response times.
+  machine. Measured on our development machine: first words in ~2.1–2.4 s, then
+  ~195–205 tokens/s ([verification transcript](docs/llm-e2e-verification.md)).
 - Terrain fidelity is highest where published survey coverage is densest (Valley Complex);
   see the data statement for coverage details.
 
