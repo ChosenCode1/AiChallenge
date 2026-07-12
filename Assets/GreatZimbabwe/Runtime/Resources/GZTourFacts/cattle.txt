@@ -1,0 +1,6 @@
+# Curated from Dataset/chunks (2026-07-10). Sources: Smarthistory, WHE, LibreTexts. Lines starting with # are stripped.
+Cattle were the walking wealth of Great Zimbabwe — herds measured status, moved with brides as marriage dowry, and fed the court.
+Before gold, there was cattle: managing great herds is what gave the elites their power, and likely what let the Shona expand from farming into mining and long-distance trade.
+The large herds that supplied the city moved seasonally between pastures, managed by the royal court itself.
+The profits of the famous gold trade ran narrow — there were no public marketplaces, and exchange among the nobility ran on barter — but cattle and farming were the everyday economy everyone lived by.
+# Note for the scene: the animals below are placeholder stand-ins; swap GZHerdRunner.agentPrefab for real animated cattle.
