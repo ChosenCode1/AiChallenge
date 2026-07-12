@@ -108,3 +108,10 @@ InitTestScene*.unity*
 
 # Stray "/dev/null" path artifact created by tooling/hooks on Windows
 /dev/null/
+
+# Unity crash-recovery scenes (local salvage data, not project content)
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta
+
+# Generated preview captures at repo root (curated copies live in docs/screenshots/)
+/Preview_*.png

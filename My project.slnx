@@ -1,4 +1,7 @@
 ﻿<Solution>
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="GreatZimbabwe.Runtime.csproj" />
+  <Project Path="GreatZimbabwe.Editor.csproj" />
+  <Project Path="GreatZimbabwe.Tests.Editor.csproj" />
 </Solution>
