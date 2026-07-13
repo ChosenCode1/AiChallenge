@@ -115,3 +115,6 @@ InitTestScene*.unity*
 
 # Generated preview captures at repo root (curated copies live in docs/screenshots/)
 /Preview_*.png
+
+# Python bytecode from the CLI verification tools
+__pycache__/

@@ -51,6 +51,7 @@ def build_system_prompt():
     L.append("Line 1: exactly one JSON object on a single line, no markdown fences, like")
     L.append('{"poi":"hill_complex","view":"normal","orbit":"normal"}')
     L.append("  poi must be one of: stay" + "".join(", " + p[0] for p in POIS) + '. Use "stay" to keep the current view.')
+    L.append('  Pick the MOST SPECIFIC place that answers the question — where people lived means valley_ruins or karanga_village, not the overview; use "overview" only for site-wide questions.')
     L.append('  view: "high" | "normal" | "low" | "close" — how the camera should sit. Prefer "high" for wide context, "low" only for ground activity like the cattle.')
     L.append('  orbit: "slow" | "normal" | "fast".')
     L.append("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists. Write dates with AD/BC notation, never CE/BCE. Exactly ONE steering line and ONE narration per answer — never output JSON again after the first line, and never chain multiple tour stops into one answer.")
