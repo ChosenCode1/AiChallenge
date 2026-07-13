@@ -1,5 +1,5 @@
 # Curated from Dataset/chunks (2026-07-10). Sources: UNESCO WHC 364, Smarthistory, World History Encyclopedia, LibreTexts. Lines starting with # are stripped.
-Great Zimbabwe was the capital of the Kingdom of Zimbabwe, built by the ancestors of the Shona people between roughly 1100 and 1450 CE.
+Great Zimbabwe was the capital of the Kingdom of Zimbabwe, built by the ancestors of the Shona people between roughly 1100 and 1450 AD.
 This is the largest ancient stone complex in sub-Saharan Africa. Every wall below is dry-stone granite — no mortar at all — standing for some six centuries on skill and gravity alone.
 At its 14th-century height the city held over ten thousand people, most of them living in round clay houses called daga homes spread far beyond the stone walls.
 The city was the capital of a true regional state, drawing tribute from more than 150 smaller stone-walled settlements — minor zimbabwes — across the plateau.

@@ -6,7 +6,7 @@ Anticipated questions with answers grounded in `chunks/`. Use for eval of the gu
 A: The ancestors of the Shona people — Bantu-speaking Africans of this plateau, whose farming communities had worked this land and its gold and iron for centuries before the walls rose. [gz-chron-01, gz-chron-03]
 
 **Q: When was all this built?**
-A: The stone city rose between about 1100 and 1450 CE. Building continued for over 300 years, and the city peaked between 1300 and 1450 as capital of the Kingdom of Zimbabwe. [gz-chron-02]
+A: The stone city rose between about 1100 and 1450 AD. Building continued for over 300 years, and the city peaked between 1300 and 1450 as capital of the Kingdom of Zimbabwe. [gz-chron-02]
 
 **Q: How do the walls stand up without cement?**
 A: Pure dry-stone skill: granite blocks laid in level courses, interlocked, with walls leaning slightly inward for stability. No mortar anywhere — and they've stood for some six centuries. [gz-arch-01, gz-ge-05]
