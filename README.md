@@ -61,6 +61,11 @@ More captures in [docs/screenshots/](docs/screenshots/).
 One process, fully offline. The AI layer sits behind an abstract backend so it is
 independently testable and swappable.
 
+![Architecture — one machine, one Unity process, curated dataset in, local LLM over localhost](docs/architecture.png)
+
+<details>
+<summary>Text version of the diagram</summary>
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ UNITY (C#) — single offline process                          │
@@ -83,6 +88,8 @@ independently testable and swappable.
 │  keyword-cued scene moments in sync with the narration       │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+</details>
 
 The tour director tries the local LLM first and **silently falls back** to the scripted guide
 on any failure — the demo never dies, and a kiosk with no model installed still works honestly
