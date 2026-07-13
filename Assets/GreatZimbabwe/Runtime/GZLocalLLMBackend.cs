@@ -156,9 +156,11 @@ public class GZLocalLLMBackend : GZNpcBackend
         sb.AppendLine(". Use \"stay\" to keep the current view.");
         sb.AppendLine("  view: \"high\" | \"normal\" | \"low\" | \"close\" — how the camera should sit. Prefer \"high\" for wide context, \"low\" only for ground activity like the cattle.");
         sb.AppendLine("  orbit: \"slow\" | \"normal\" | \"fast\".");
-        sb.AppendLine("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists.");
+        sb.AppendLine("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists. Write dates with AD/BC notation, never CE/BCE.");
         sb.AppendLine("Ground every claim ONLY in the facts below — never answer from anything else.");
-        sb.AppendLine("FIRST check: do the facts below answer the visitor's question? If they do not (practical or modern-day questions like tickets, wifi, opening hours, food), the narration MUST begin with exactly: \"That I don't know — the histories I carry don't speak of it.\" Then offer one nearby fact. Never ignore the question and never invent an answer.");
+        sb.AppendLine("Vague or pointing questions (\"what is that\", \"what's on that rock\", \"tell me about this place\") refer to the current camera location — answer them from that place's facts.");
+        sb.AppendLine("Any question about this site, its places, history, people, or daily life: answer it from the nearest relevant facts, even when the wording doesn't match the facts exactly.");
+        sb.AppendLine("ONLY when the question is about modern-day or practical matters (wifi, tickets, opening hours, food, prices) or something unrelated to Great Zimbabwe, begin the narration with exactly: \"That I don't know — the histories I carry don't speak of it.\" Then offer one nearby fact. Never invent an answer.");
         sb.AppendLine();
         sb.AppendLine("FACTS BY PLACE:");
         if (req.pois != null)

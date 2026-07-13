@@ -53,9 +53,11 @@ def build_system_prompt():
     L.append("  poi must be one of: stay" + "".join(", " + p[0] for p in POIS) + '. Use "stay" to keep the current view.')
     L.append('  view: "high" | "normal" | "low" | "close" — how the camera should sit. Prefer "high" for wide context, "low" only for ground activity like the cattle.')
     L.append('  orbit: "slow" | "normal" | "fast".')
-    L.append("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists.")
+    L.append("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists. Write dates with AD/BC notation, never CE/BCE.")
     L.append("Ground every claim ONLY in the facts below — never answer from anything else.")
-    L.append('FIRST check: do the facts below answer the visitor\'s question? If they do not (practical or modern-day questions like tickets, wifi, opening hours, food), the narration MUST begin with exactly: "That I don\'t know — the histories I carry don\'t speak of it." Then offer one nearby fact. Never ignore the question and never invent an answer.')
+    L.append('Vague or pointing questions ("what is that", "what\'s on that rock", "tell me about this place") refer to the current camera location — answer them from that place\'s facts.')
+    L.append("Any question about this site, its places, history, people, or daily life: answer it from the nearest relevant facts, even when the wording doesn't match the facts exactly.")
+    L.append('ONLY when the question is about modern-day or practical matters (wifi, tickets, opening hours, food, prices) or something unrelated to Great Zimbabwe, begin the narration with exactly: "That I don\'t know — the histories I carry don\'t speak of it." Then offer one nearby fact. Never invent an answer.')
     L.append("")
     L.append("FACTS BY PLACE:")
     for pid, name in POIS:
@@ -107,9 +109,10 @@ def ask(question, current_poi="overview"):
     dt = time.time() - t0
     return "".join(text), first_tok, n_tokens, dt
 
-def validate(name, question, expect_poi=None, expect_idk=False):
-    print(f"\n{'='*70}\nTEST: {name}\nQ: {question}")
-    answer, ttft, ntok, dt = ask(question)
+def validate(name, question, expect_poi=None, expect_idk=False, expect_no_idk=False,
+             current_poi="overview"):
+    print(f"\n{'='*70}\nTEST: {name}\nQ: {question}  (camera at: {current_poi})")
+    answer, ttft, ntok, dt = ask(question, current_poi)
     lines = answer.split("\n", 1)
     header, narration = lines[0].strip(), (lines[1].strip() if len(lines) > 1 else "")
     ok, notes = True, []
@@ -128,10 +131,12 @@ def validate(name, question, expect_poi=None, expect_idk=False):
         ok = False; notes.append("no narration after header")
     wc = len(narration.split())
     print(f"NARRATION ({wc} words): {narration}")
-    if expect_idk:
-        idk_markers = ["don't know", "don’t know", "not cover", "no information"]
-        if not any(m in narration.lower() for m in idk_markers):
-            ok = False; notes.append("expected an I-don't-know style refusal")
+    idk_markers = ["don't know", "don’t know", "not cover", "no information"]
+    is_idk = any(m in narration.lower() for m in idk_markers)
+    if expect_idk and not is_idk:
+        ok = False; notes.append("expected an I-don't-know style refusal")
+    if expect_no_idk and is_idk:
+        ok = False; notes.append("guide refused a sightseeing question it should answer")
     gen_rate = (ntok - 1) / (dt - ttft) if dt > ttft and ntok > 1 else 0
     print(f"TIMING: first output {ttft:.1f}s | {ntok} tokens in {dt:.1f}s | ~{gen_rate:.1f} tok/s generation")
     for n in notes: print("  " + n)
@@ -145,6 +150,8 @@ if __name__ == "__main__":
     results.append(validate("Grounded hero question", "Why is the Conical Tower solid?", expect_poi="conical_tower"))
     results.append(validate("Unpredicted composition question", "What did the people here trade, and where did the goods end up?"))
     results.append(validate("Out-of-corpus refusal", "What is the wifi password at the visitor centre?", expect_idk=True))
+    results.append(validate("Vague pointing question (must answer, not refuse)", "what is on that rock", expect_no_idk=True, current_poi="hill_complex"))
+    results.append(validate("Deictic place question (must answer, not refuse)", "tell me about this place", expect_no_idk=True, current_poi="great_enclosure"))
     print(f"\n{'='*70}")
     passed = sum(1 for r in results if r[0])
     rates = [r[1] for r in results if r[1] > 0]
