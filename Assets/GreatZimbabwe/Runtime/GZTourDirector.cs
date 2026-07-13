@@ -45,6 +45,15 @@ public class GZTourDirector : MonoBehaviour
     float _lastAnswerEnd = -1f;
     bool _awaitingArrival;
 
+    // Short conversation memory so follow-ups ("what else?") have context.
+    // Kept small: enough for a follow-up chain, bounded prompt cost.
+    const int MaxHistoryTurns = 4;
+    const int MaxTurnChars = 700;
+    readonly List<GZNpcTurn> _history = new List<GZNpcTurn>();
+    readonly System.Text.StringBuilder _narration = new System.Text.StringBuilder();
+    string _lastSteer;
+    GZTourPOI _answerPoi;
+
     GZTourPOI Overview => FindPoi(overviewPoiId);
 
     void Start()
@@ -122,6 +131,7 @@ public class GZTourDirector : MonoBehaviour
 
         tourCamera.FlyTo(poi, cmd.view, cmd.orbit);
         _awaitingArrival = true;
+        _answerPoi = poi;
         if (fxDirector != null) fxDirector.SetAnswerPoi(poi);
         if (ui != null) ui.SetDestination("En route: " + poi.displayName);
     }
@@ -138,6 +148,8 @@ public class GZTourDirector : MonoBehaviour
 
     void DispatchTo(GZNpcBackend backend)
     {
+        _narration.Length = 0;   // a fallback re-ask starts a fresh answer
+        _lastSteer = null;
         if (fxDirector != null) fxDirector.BeginAnswer();
         if (ui != null)
             ui.SetStatus("The guide is thinking (" + backend.BackendLabel + ")…", GZTourUI.StatusTone.Busy);
@@ -158,18 +170,24 @@ public class GZTourDirector : MonoBehaviour
             pois = pois,
             keywordGuess = GZKeywordResolver.Resolve(_question, pois),
             currentPoi = tourCamera != null ? tourCamera.CurrentPoi : null,
+            history = new List<GZNpcTurn>(_history),
         };
     }
 
     void HandleCommand(GZTourCommand cmd)
     {
         ApplyCommand(cmd);
+        if (cmd != null)
+            _lastSteer = "{\"poi\":\"" + (string.IsNullOrEmpty(cmd.poi) ? "stay" : cmd.poi) +
+                         "\",\"view\":\"" + (string.IsNullOrEmpty(cmd.view) ? "normal" : cmd.view) +
+                         "\",\"orbit\":\"" + (string.IsNullOrEmpty(cmd.orbit) ? "normal" : cmd.orbit) + "\"}";
         if (ui != null)
             ui.SetStatus("The guide is speaking — questions unlock when it finishes", GZTourUI.StatusTone.Busy);
     }
 
     void HandleToken(string token)
     {
+        _narration.Append(token);
         if (ui != null) ui.AppendAnswer(token);
         if (fxDirector != null) fxDirector.FeedNarration(token);
     }
@@ -184,6 +202,21 @@ public class GZTourDirector : MonoBehaviour
                 ui.SetStatus("Local LLM unreachable (" + (error ?? "no response") + ") — offline guide answering", GZTourUI.StatusTone.Warn);
             DispatchTo(scriptedBackend);
             return;
+        }
+
+        if (success && _narration.Length > 0)
+        {
+            string said = _narration.ToString().Trim();
+            if (said.Length > MaxTurnChars) said = said.Substring(0, MaxTurnChars);
+            _history.Add(new GZNpcTurn { question = _question, steer = _lastSteer, narration = said });
+            if (_history.Count > MaxHistoryTurns) _history.RemoveAt(0);
+
+            // Every fact the guide can state is curated and attributed —
+            // show the answer's sources under the narration.
+            var citedPoi = _answerPoi ?? (tourCamera != null ? tourCamera.CurrentPoi : null);
+            string sources = citedPoi != null ? GZTourFacts.Sources(citedPoi.id) : "";
+            if (ui != null && sources.Length > 0)
+                ui.AppendAnswer("\n\nSources: " + sources);
         }
 
         State = GZTourState.Idle;

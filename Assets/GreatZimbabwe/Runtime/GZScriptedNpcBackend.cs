@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -15,6 +16,10 @@ public class GZScriptedNpcBackend : GZNpcBackend
     public float thinkDelay = 0.7f;
 
     Coroutine _run;
+
+    // Reading position per POI, so repeat questions ("what else?") continue
+    // through the fact sheet instead of re-reading its opening.
+    readonly Dictionary<string, int> _cursor = new Dictionary<string, int>();
 
     public override string BackendLabel => "offline guide";
 
@@ -52,26 +57,39 @@ public class GZScriptedNpcBackend : GZNpcBackend
         cb.onComplete?.Invoke(true, null);
     }
 
-    static string BuildNarration(GZTourPOI poi, bool wasGuess)
+    string BuildNarration(GZTourPOI poi, bool wasGuess)
     {
         if (poi == null)
             return "I know this place well — ask me about the Hill Complex, the Great Enclosure, " +
                    "the Conical Tower, the Valley Ruins, the village, or the cattle, and I will fly you there.";
 
         string facts = GZTourFacts.Load(poi.id);
-        string intro = wasGuess
-            ? "While we are here at " + poi.displayName + " — "
-            : "Let me take you to " + poi.displayName + ". ";
         if (string.IsNullOrEmpty(facts))
-            return intro + "The curated facts for this place have not been written yet, but enjoy the view while we circle it.";
+            return (wasGuess ? "While we are here at " : "Let me take you to ") + poi.displayName +
+                   " — the curated facts for this place have not been written yet, but enjoy the view while we circle it.";
+
+        string body = facts.Replace("\n", " ").Trim();
+
+        // Continue from where the last answer for this POI stopped.
+        int start = 0;
+        if (_cursor.TryGetValue(poi.id, out int saved) && saved > 0 && saved < body.Length - 100)
+            start = saved;
 
         // Keep the lock window comfortable: cap at ~600 chars, cut at a sentence end.
-        string body = facts.Replace("\n", " ").Trim();
-        if (body.Length > 600)
+        string window = body.Substring(start);
+        if (window.Length > 600)
         {
-            int cut = body.LastIndexOf(". ", 600);
-            body = cut > 200 ? body.Substring(0, cut + 1) : body.Substring(0, 600);
+            int cut = window.LastIndexOf(". ", 600);
+            window = cut > 200 ? window.Substring(0, cut + 1) : window.Substring(0, 600);
         }
-        return intro + body;
+        int next = start + window.Length;
+        _cursor[poi.id] = next >= body.Length - 100 ? 0 : next;   // wrap near the end
+
+        string intro = start > 0
+            ? "There is more to tell here. "
+            : wasGuess
+                ? "While we are here at " + poi.displayName + " — "
+                : "Let me take you to " + poi.displayName + ". ";
+        return intro + window.TrimStart();
     }
 }

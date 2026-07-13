@@ -110,4 +110,28 @@ public static class GZTourFacts
         }
         return sb.ToString().Trim();
     }
+
+    /// <summary>
+    /// The source attribution recorded in the sheet's '#' header
+    /// ("... Sources: X, Y, Z. ..."), for display under the guide's answers.
+    /// Returns "" if the sheet or its attribution is missing.
+    /// </summary>
+    public static string Sources(string poiId)
+    {
+        if (string.IsNullOrEmpty(poiId)) return "";
+        var asset = Resources.Load<TextAsset>("GZTourFacts/" + poiId);
+        if (asset == null) return "";
+        foreach (var raw in asset.text.Replace("\r", "").Split('\n'))
+        {
+            string line = raw.Trim();
+            if (!line.StartsWith("#")) continue;
+            int at = line.IndexOf("Sources:");
+            if (at < 0) continue;
+            string tail = line.Substring(at + "Sources:".Length).Trim();
+            int stop = tail.IndexOf(". ");
+            if (stop > 0) tail = tail.Substring(0, stop);
+            return tail.TrimEnd('.');
+        }
+        return "";
+    }
 }

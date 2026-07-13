@@ -74,6 +74,19 @@ public class GZLocalLLMBackend : GZNpcBackend
 
     IEnumerator Run(GZNpcRequest req, GZNpcCallbacks cb)
     {
+        var msgs = new List<Msg> { new Msg { role = "system", content = BuildSystemPrompt(req) } };
+        if (req.history != null)
+        {
+            foreach (var t in req.history)
+            {
+                if (string.IsNullOrEmpty(t.question) || string.IsNullOrEmpty(t.narration)) continue;
+                msgs.Add(new Msg { role = "user", content = t.question });
+                // Replay the steering line too, so every assistant turn models the output format.
+                msgs.Add(new Msg { role = "assistant", content = string.IsNullOrEmpty(t.steer) ? t.narration : t.steer + "\n" + t.narration });
+            }
+        }
+        msgs.Add(new Msg { role = "user", content = BuildUserPrompt(req) });
+
         string body = JsonUtility.ToJson(new ChatRequest
         {
             model = model,
@@ -81,11 +94,7 @@ public class GZLocalLLMBackend : GZNpcBackend
             temperature = temperature,
             max_tokens = maxTokens,
             reasoning_effort = reasoningEffort,
-            messages = new[]
-            {
-                new Msg { role = "system", content = BuildSystemPrompt(req) },
-                new Msg { role = "user", content = BuildUserPrompt(req) },
-            },
+            messages = msgs.ToArray(),
         });
 
         var parser = new AnswerParser(req, cb);
@@ -156,11 +165,13 @@ public class GZLocalLLMBackend : GZNpcBackend
         sb.AppendLine(". Use \"stay\" to keep the current view.");
         sb.AppendLine("  view: \"high\" | \"normal\" | \"low\" | \"close\" — how the camera should sit. Prefer \"high\" for wide context, \"low\" only for ground activity like the cattle.");
         sb.AppendLine("  orbit: \"slow\" | \"normal\" | \"fast\".");
-        sb.AppendLine("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists. Write dates with AD/BC notation, never CE/BCE.");
+        sb.AppendLine("After that line: your spoken narration. 60-120 words, vivid but factual, plain prose, no markdown, no lists. Write dates with AD/BC notation, never CE/BCE. Exactly ONE steering line and ONE narration per answer — never output JSON again after the first line, and never chain multiple tour stops into one answer.");
         sb.AppendLine("Ground every claim ONLY in the facts below — never answer from anything else.");
         sb.AppendLine("Vague or pointing questions (\"what is that\", \"what's on that rock\", \"tell me about this place\") refer to the current camera location — answer them from that place's facts.");
         sb.AppendLine("Any question about this site, its places, history, people, or daily life: answer it from the nearest relevant facts, even when the wording doesn't match the facts exactly.");
-        sb.AppendLine("ONLY when the question is about modern-day or practical matters (wifi, tickets, opening hours, food, prices) or something unrelated to Great Zimbabwe, begin the narration with exactly: \"That I don't know — the histories I carry don't speak of it.\" Then offer one nearby fact. Never invent an answer.");
+        sb.AppendLine("Answer the visitor's actual question directly in your FIRST sentence — a yes/no question gets a plain yes or no (for example, doubts about who built the city are answered plainly from the facts: the ancestors of the Shona people) — then add context.");
+        sb.AppendLine("Earlier exchanges may precede this question — NEVER repeat facts or sentences you already said; every answer must add something new. On \"what else\" or similar follow-ups, continue about the same place with facts not yet mentioned; once you have shared everything about it, say so and invite the visitor to another place from the list. Questions about what you yourself said earlier are answered from those exchanges — they are never unknown.");
+        sb.AppendLine("ONLY when the question is about modern-day or practical matters (wifi, tickets, opening hours, food, prices), something unrelated to Great Zimbabwe, or a specific detail the facts do not record (a person's name, an exact date or number), begin the narration with exactly: \"That I don't know — the histories I carry don't speak of it.\" Then offer one nearby fact. Never invent an answer. Never use that sentence about something you already told the visitor — repeat or rephrase your earlier words instead.");
         sb.AppendLine();
         sb.AppendLine("FACTS BY PLACE:");
         if (req.pois != null)
@@ -196,6 +207,13 @@ public class GZLocalLLMBackend : GZNpcBackend
         readonly StringBuilder _header = new StringBuilder();
         bool _headerDone;
 
+        // Some models echo the steering JSON again inside the narration. Any
+        // narration line that starts with '{' is held until it completes, then
+        // dropped if it parses as a steering command.
+        readonly StringBuilder _lineHold = new StringBuilder();
+        bool _holding;
+        bool _atLineStart = true;
+
         public bool SawAnyOutput { get; private set; }
         public bool NarrationEmitted { get; private set; }
 
@@ -204,7 +222,7 @@ public class GZLocalLLMBackend : GZNpcBackend
         public void Feed(string token)
         {
             SawAnyOutput = true;
-            if (_headerDone) { EmitNarration(token); return; }
+            if (_headerDone) { FilterNarration(token); return; }
 
             _header.Append(token);
             string buffered = _header.ToString();
@@ -222,15 +240,61 @@ public class GZLocalLLMBackend : GZNpcBackend
             {
                 cmd = FallbackCommand();
                 EmitNarration(headerLine.TrimStart());  // header was actually speech
-                if (rest.Length > 0) EmitNarration(rest);
+                _atLineStart = false;
+                if (rest.Length > 0) FilterNarration("\n" + rest);
             }
-            else if (rest.Length > 0) EmitNarration(rest);
+            else
+            {
+                // Some models glue narration onto the command line with no
+                // newline — keep whatever follows the closing brace as speech.
+                int brace = headerLine.LastIndexOf('}');
+                string glued = brace >= 0 && brace + 1 < headerLine.Length
+                    ? headerLine.Substring(brace + 1).TrimStart() : "";
+                if (glued.Length > 0) { EmitNarration(glued); _atLineStart = false; }
+                if (rest.Length > 0) FilterNarration(glued.Length > 0 ? "\n" + rest : rest);
+            }
             _cb.onCommand?.Invoke(cmd);
+        }
+
+        /// <summary>Streams narration through, holding back any line that starts
+        /// with '{' until it completes; a completed line that parses as a steering
+        /// command is dropped instead of shown.</summary>
+        void FilterNarration(string text)
+        {
+            var emit = new StringBuilder();
+            foreach (char c in text)
+            {
+                if (_holding)
+                {
+                    _lineHold.Append(c);
+                    // A real command line is short; past 200 chars it's prose.
+                    if (c == '\n' || _lineHold.Length > 200)
+                    {
+                        string held = _lineHold.ToString();
+                        if (ExtractCommand(held) == null) emit.Append(held);
+                        _lineHold.Length = 0;
+                        _holding = false;
+                        _atLineStart = c == '\n';
+                    }
+                    continue;
+                }
+                if (_atLineStart && c == '{') { _holding = true; _lineHold.Append(c); continue; }
+                _atLineStart = c == '\n';
+                emit.Append(c);
+            }
+            if (emit.Length > 0) EmitNarration(emit.ToString());
         }
 
         public void Finish()
         {
-            if (_headerDone) return;
+            if (_headerDone)
+            {
+                // Flush a held line that never completed — unless it's a command echo.
+                if (_holding && _lineHold.Length > 0 && ExtractCommand(_lineHold.ToString()) == null)
+                    EmitNarration(_lineHold.ToString());
+                _holding = false;
+                return;
+            }
             // Stream ended before a newline: try the buffer as a command, else as speech.
             _headerDone = true;
             string buffered = _header.ToString();
