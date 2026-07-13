@@ -30,6 +30,12 @@ public class GZTourCamera : MonoBehaviour
     [Tooltip("+1 = counter-clockwise orbits, -1 = clockwise.")]
     public float orbitSign = 1f;
 
+    [Header("Quality floor (asset-friendly heights)")]
+    [Tooltip("Hard floor on orbit height above the focus ground, metres. No POI tuning or 'low'/'close' view hint can take the camera below this.")]
+    public float minAltitude = 70f;
+    [Tooltip("Hard floor on terrain clearance everywhere (orbits and transits), metres. Overrides any smaller per-POI clearance.")]
+    public float minClearanceFloor = 50f;
+
     public GZTourPOI CurrentPoi { get; private set; }
 
     /// <summary>True once the camera has settled onto the current POI's orbit ring.
@@ -110,7 +116,8 @@ public class GZTourCamera : MonoBehaviour
         var poi = CurrentPoi;
 
         float radius = Mathf.Max(20f, poi.orbitRadius * _radMul);
-        float altitude = Mathf.Max(10f, poi.altitude * _altMul + altitudeBias);
+        float altitude = Mathf.Max(minAltitude, poi.altitude * _altMul + altitudeBias);
+        float clearance = Mathf.Max(poi.minClearance, minClearanceFloor);
 
         // Advance along the ring at constant linear speed.
         float degPerSec = Mathf.Rad2Deg * (poi.cruiseSpeed * _spdMul * Mathf.Max(0.05f, speedMultiplier)) / radius;
@@ -123,7 +130,7 @@ public class GZTourCamera : MonoBehaviour
         Vector3 ringDir = Quaternion.Euler(0f, _angleDeg, 0f) * Vector3.forward;
         Vector3 desired = _smoothedFocus + ringDir * radius;
         desired.y = focusGroundY + altitude;
-        desired.y = Mathf.Max(desired.y, TerrainY(desired) + poi.minClearance);
+        desired.y = Mathf.Max(desired.y, TerrainY(desired) + clearance);
 
         Vector3 pos = Vector3.SmoothDamp(transform.position, desired, ref _velocity, smoothTime, maxSpeed, dt);
 
@@ -133,7 +140,7 @@ public class GZTourCamera : MonoBehaviour
         // Terrain clearance clamp with lookahead: only ever pushes the camera UP,
         // so it climbs over the hill during transits instead of clipping the cliff.
         Vector3 ahead = pos + _velocity * 1.2f;
-        float minY = Mathf.Max(TerrainY(pos), TerrainY(ahead)) + poi.minClearance;
+        float minY = Mathf.Max(TerrainY(pos), TerrainY(ahead)) + clearance;
         if (pos.y < minY)
         {
             pos.y = Mathf.Lerp(pos.y, minY, 1f - Mathf.Exp(-climbResponsiveness * dt));

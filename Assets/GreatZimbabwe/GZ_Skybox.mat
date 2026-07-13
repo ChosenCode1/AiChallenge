@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GZ_Skybox
+  m_Shader: {fileID: 4800000, guid: 8c6b57a72e8b96a41b3d3f12c02a1f3e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _CloudCoverage: 0.38
+    - _CloudOpacity: 0.85
+    - _CloudScale: 2.2
+    - _CloudSoftness: 0.32
+    - _CloudSpeed: 0.008
+    - _HazeHeight: 5.5
+    - _SunGlow: 0.9
+    - _SunSize: 0.001
+    - _SunWarmth: 0.9
+    m_Colors:
+    - _CloudLitColor: {r: 1, g: 0.96, b: 0.9, a: 1}
+    - _CloudShadeColor: {r: 0.65999997, g: 0.65999997, b: 0.72, a: 1}
+    - _GroundColor: {r: 0.33999997, g: 0.26999995, b: 0.20999995, a: 1}
+    - _HorizonColor: {r: 0.93, g: 0.74, b: 0.50999993, a: 1}
+    - _MidColor: {r: 0.41999996, g: 0.56, b: 0.75, a: 1}
+    - _SunColor: {r: 1, g: 0.93, b: 0.78, a: 1}
+    - _ZenithColor: {r: 0.14499995, g: 0.28599998, b: 0.5019999, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -53,6 +53,24 @@ public static class GZAmbientLifeSetup
 
     // ---------- ambient life ----------
 
+    [MenuItem("Tools/Great Zimbabwe/Setup Ambient Life")]
+    static void SetupMenu() { Debug.Log(SetupAmbientLife()); }
+
+    [MenuItem("Tools/Great Zimbabwe/Remove Ambient Life")]
+    static void RemoveMenu() { Debug.Log(RemoveAmbientLife()); }
+
+    /// <summary>CLI entry (project closed in the editor):
+    /// Unity.exe -batchmode -quit -projectPath "My project" -executeMethod GZAmbientLifeSetup.SetupFromCli</summary>
+    public static void SetupFromCli()
+    {
+        const string scenePath = "Assets/Scenes/GreatZimbabwe.unity";
+        if (SceneManager.GetActiveScene().path != scenePath)
+            EditorSceneManager.OpenScene(scenePath);
+        string result = SetupAmbientLife();
+        Debug.Log("[GZAmbientLifeSetup] " + result);
+        if (result.StartsWith("ABORT")) throw new System.Exception(result);
+    }
+
     public static string SetupAmbientLife()
     {
         var scene = SceneManager.GetActiveScene();
@@ -109,10 +127,14 @@ public static class GZAmbientLifeSetup
             new Vector3(400f, 56f, 550f),
             new Vector3(430f, 66f, 650f),
         };
-        herd.count = 9;
+        // 100 animals stays mobile-cheap because the coat shader GPU-instances:
+        // every body shares one instanced draw, every head another (plus the
+        // instanced shadow pass) instead of 200 individual draw calls.
+        herd.count = 100;
+        herd.lateralJitter = 12f;
         herd.placeholderMaterial = LoadOrCreateHerdMaterial();
         herd.RebuildAgents();
-        log.Append("Herd: 9 placeholder agents on a 490 m valley route (assign agentPrefab to use real animals). | ");
+        log.Append("Herd: 100 instanced agents on a 490 m valley route (assign agentPrefab to use real animals). | ");
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
@@ -240,12 +262,22 @@ public static class GZAmbientLifeSetup
     static Material LoadOrCreateHerdMaterial()
     {
         var mat = AssetDatabase.LoadAssetAtPath<Material>(HerdMatPath);
-        if (mat != null) return mat;
-        var shader = Shader.Find("Universal Render Pipeline/Lit");
-        mat = new Material(shader);
-        mat.SetColor("_BaseColor", new Color(0.16f, 0.12f, 0.09f));
-        mat.SetFloat("_Smoothness", 0.15f);
-        AssetDatabase.CreateAsset(mat, HerdMatPath);
+        if (mat == null)
+        {
+            // The herd's coat shader (procedural hide + gait); URP/Lit only as a fallback
+            // if the GreatZimbabwe shaders are ever stripped from the project.
+            var shader = Shader.Find("GreatZimbabwe/HerdGold");
+            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
+            mat = new Material(shader);
+            mat.SetColor("_BaseColor", new Color(0.16f, 0.12f, 0.09f));
+            AssetDatabase.CreateAsset(mat, HerdMatPath);
+        }
+        if (!mat.enableInstancing)
+        {
+            // Required for the herd to collapse into instanced draws on mobile.
+            mat.enableInstancing = true;
+            EditorUtility.SetDirty(mat);
+        }
         return mat;
     }
 }

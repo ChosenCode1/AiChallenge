@@ -434,7 +434,10 @@ public static class GZMobileBaker
             new Vector3(400f, 56f, 550f),
             new Vector3(430f, 66f, 650f),
         };
-        herd.count = 9;
+        // 100 animals is safe on mobile: the HerdGold shader GPU-instances, so the
+        // whole herd is a handful of instanced draws regardless of count.
+        herd.count = 100;
+        herd.lateralJitter = 12f;
         herd.placeholderMaterial = AssetDatabase.LoadAssetAtPath<Material>(HerdMatPath);
         herd.RebuildAgents();
 

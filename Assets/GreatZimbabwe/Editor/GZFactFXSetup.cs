@@ -188,14 +188,9 @@ public static class GZFactFXSetup
             log.Append("Unwired tour director. ");
         }
 
-        // Give the herd its plain URP/Lit look back (properties carry over).
-        var herdMat = AssetDatabase.LoadAssetAtPath<Material>(HerdMatPath);
-        if (herdMat != null && herdMat.shader != null && herdMat.shader.name == "GreatZimbabwe/HerdGold")
-        {
-            herdMat.shader = Shader.Find("Universal Render Pipeline/Lit");
-            EditorUtility.SetDirty(herdMat);
-            log.Append("Restored herd material to URP/Lit. ");
-        }
+        // The herd keeps the HerdGold coat shader: it is now the cattle's everyday
+        // look (procedural hide + gait bounce) and its gold rim channel simply idles
+        // at zero once the FX director is gone.
 
         foreach (var path in new[] { RingMatPath, WallMatPath, TowerMatPath, RouteMatPath, GrainMatPath, GrainTexPath })
             if (AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path) != null)
@@ -418,11 +413,12 @@ public static class GZFactFXSetup
         if (mat == null) return "WARN: herd material missing (run GZAmbientLifeSetup) — gold rim skipped. ";
         var shader = Shader.Find("GreatZimbabwe/HerdGold");
         if (shader == null) return "WARN: HerdGold shader missing. ";
-        if (mat.shader == shader) return "Herd gold rim already active. ";
-        mat.shader = shader; // _BaseColor carries over from URP/Lit
+        if (!mat.enableInstancing) { mat.enableInstancing = true; EditorUtility.SetDirty(mat); }
+        if (mat.shader == shader) return "Herd coat + gold rim already active. ";
+        mat.shader = shader; // _BaseColor carries over from URP/Lit as Coat A
         mat.SetFloat("_RimPower", 2f);
         EditorUtility.SetDirty(mat);
-        return "Herd material swapped to HerdGold (rest look unchanged). ";
+        return "Herd material swapped to HerdGold (procedural coat + FX gold rim). ";
     }
 
     static void PlaceWall(Transform root, string name, Material mat, Terrain terrain,

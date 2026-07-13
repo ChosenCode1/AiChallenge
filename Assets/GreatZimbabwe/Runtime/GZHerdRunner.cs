@@ -19,7 +19,7 @@ public class GZHerdRunner : MonoBehaviour
     [Tooltip("Optional animated prefab (e.g. an antelope with a run animation). Leave empty for placeholder blobs.")]
     public GameObject agentPrefab;
 
-    [Range(1, 64)] public int count = 9;
+    [Range(1, 200)] public int count = 9;
     public float minSpeed = 3.5f;
     public float maxSpeed = 5.5f;
     [Tooltip("Max sideways offset from the path centreline, in metres.")]
@@ -28,6 +28,8 @@ public class GZHerdRunner : MonoBehaviour
     public float speedMultiplier = 1f;
     public Material placeholderMaterial;
     public int seed = 4242;
+
+    static readonly int CowSeedId = Shader.PropertyToID("_CowSeed");
 
     readonly List<Transform> _agents = new List<Transform>();
     float[] _progress;   // metres along the path per agent
@@ -39,6 +41,7 @@ public class GZHerdRunner : MonoBehaviour
     {
         CollectAgents();
         if (Application.isPlaying && _agents.Count != count) RebuildAgents();
+        ApplyCoatSeeds();
         InitAgentState();
         LayoutAgents(0f);
     }
@@ -81,8 +84,27 @@ public class GZHerdRunner : MonoBehaviour
             }
             _agents.Add(go.transform);
         }
+        ApplyCoatSeeds();
         InitAgentState();
         LayoutAgents(0f);
+    }
+
+    /// <summary>
+    /// Gives every agent a distinct _CowSeed so the HerdGold coat shader can vary
+    /// hide patches and coat shade per animal. Set via MaterialPropertyBlock on all
+    /// child renderers (body + head share one seed so their pattern family matches);
+    /// harmless no-op for prefab agents whose shaders ignore the property.
+    /// </summary>
+    void ApplyCoatSeeds()
+    {
+        var mpb = new MaterialPropertyBlock();
+        for (int i = 0; i < _agents.Count; i++)
+        {
+            if (_agents[i] == null) continue;
+            mpb.SetFloat(CowSeedId, seed % 89 + i * 1.618f);
+            foreach (var r in _agents[i].GetComponentsInChildren<MeshRenderer>())
+                r.SetPropertyBlock(mpb);
+        }
     }
 
     GameObject CreatePlaceholder(string name)
@@ -106,10 +128,14 @@ public class GZHerdRunner : MonoBehaviour
         head.transform.localScale = new Vector3(0.32f, 0.38f, 0.42f);
         head.transform.localPosition = new Vector3(0f, 1.15f, 0.85f);
 
-        if (placeholderMaterial != null)
+        foreach (var r in new[] { body.GetComponent<MeshRenderer>(), head.GetComponent<MeshRenderer>() })
         {
-            body.GetComponent<MeshRenderer>().sharedMaterial = placeholderMaterial;
-            head.GetComponent<MeshRenderer>().sharedMaterial = placeholderMaterial;
+            if (placeholderMaterial != null) r.sharedMaterial = placeholderMaterial;
+            // At herd scale (100+ animals = 200+ renderers) per-renderer probe
+            // blending is measurable CPU on mobile; the coat shader only needs the
+            // ambient probe, which URP still supplies with probes off.
+            r.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            r.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
         }
         return root;
     }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -6,9 +7,11 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Self-building overlay UI for the aerial tour: a question bar (bottom), a
-/// streaming subtitle panel above it, and a status strip (top) that shows the
-/// question lock. Everything is constructed in code at Awake so the scene
-/// needs no authored UI assets; visuals of the NPC itself are out of scope.
+/// streaming subtitle panel above it, a status strip (top) that shows the
+/// question lock, and a guided-tour button column (left) whose buttons type a
+/// preset question into the bar and submit it — same path as pressing Enter.
+/// Everything is constructed in code at Awake so the scene needs no authored
+/// UI assets; visuals of the NPC itself are out of scope.
 /// Uses the Input System UI module (this project is new-Input-System only).
 /// </summary>
 public class GZTourUI : MonoBehaviour
@@ -33,7 +36,23 @@ public class GZTourUI : MonoBehaviour
     Image _statusDot;
     TMP_Text _destination;
     GameObject _subtitlePanel;
+    readonly List<Button> _quickButtons = new List<Button>();
     bool _built;
+
+    // Label + preset question per guided stop. Each question contains that
+    // POI's keywords, so the scripted fallback resolves the same destination
+    // the LLM would steer to.
+    static readonly string[][] QuickStops =
+    {
+        new[] { "Grand Tour",      "Give me a tour of the whole site." },
+        new[] { "Hill Complex",    "Take me up to the Hill Complex." },
+        new[] { "Great Enclosure", "Show me the Great Enclosure." },
+        new[] { "Conical Tower",   "Take me to the Conical Tower." },
+        new[] { "Valley Ruins",    "Fly me over the Valley Ruins." },
+        new[] { "Karanga Village", "Show me the Karanga village." },
+        new[] { "East Ruins",      "Take me to the East Ruins." },
+        new[] { "Cattle Herds",    "Take me down to the cattle herds." },
+    };
 
     const string IntroText =
         "Welcome to Great Zimbabwe. Ask about the Hill Complex, the Great Enclosure, the Conical Tower, " +
@@ -51,6 +70,8 @@ public class GZTourUI : MonoBehaviour
         EnsureBuilt();
         _input.interactable = !locked;
         _askButton.interactable = !locked;
+        foreach (var b in _quickButtons)
+            b.interactable = !locked;
         _askLabel.color = locked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
         ((TMP_Text)_input.placeholder).text = locked
             ? "The guide is speaking…"
@@ -116,6 +137,7 @@ public class GZTourUI : MonoBehaviour
         BuildStatusStrip(canvas.transform);
         BuildSubtitlePanel(canvas.transform);
         BuildInputBar(canvas.transform);
+        BuildQuickPanel(canvas.transform);
 
         _subtitle.text = IntroText;
         _destination.text = "";
@@ -154,8 +176,10 @@ public class GZTourUI : MonoBehaviour
 
     void BuildSubtitlePanel(Transform parent)
     {
-        _subtitlePanel = Panel(parent, "SubtitlePanel", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-            new Vector2(0.5f, 0f), new Vector2(0, 118), new Vector2(1040, 100)).gameObject;
+        // Right-hand column, growing upward from just above the input bar;
+        // the centred question bar stays where it is.
+        _subtitlePanel = Panel(parent, "SubtitlePanel", new Vector2(1f, 0f), new Vector2(1f, 0f),
+            new Vector2(1f, 0f), new Vector2(-24, 118), new Vector2(560, 100)).gameObject;
 
         var layout = _subtitlePanel.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(22, 22, 14, 14);
@@ -240,6 +264,62 @@ public class GZTourUI : MonoBehaviour
         _askLabel.color = Color.white;
         _askLabel.text = "ASK";
         Stretch(_askLabel.rectTransform);
+    }
+
+    void BuildQuickPanel(Transform parent)
+    {
+        // Left-hand column of guided stops, vertically centred.
+        var panel = Panel(parent, "QuickPanel", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+            new Vector2(0f, 0.5f), new Vector2(24, 0), new Vector2(240, 100));
+
+        var layout = panel.gameObject.AddComponent<VerticalLayoutGroup>();
+        layout.padding = new RectOffset(12, 12, 12, 14);
+        layout.spacing = 8f;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+        var fitter = panel.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var header = Text(panel.transform, "Header", 21, TextAlignmentOptions.Center);
+        header.text = "Guided Tour";
+        header.fontStyle = FontStyles.SmallCaps | FontStyles.Bold;
+        header.color = accentColor;
+        header.gameObject.AddComponent<LayoutElement>().preferredHeight = 30;
+
+        foreach (var stop in QuickStops)
+            BuildQuickButton(panel.transform, stop[0], stop[1]);
+    }
+
+    void BuildQuickButton(Transform parent, string label, string question)
+    {
+        var go = new GameObject(label, typeof(Image), typeof(Button), typeof(LayoutElement));
+        go.transform.SetParent(parent, false);
+        go.GetComponent<LayoutElement>().preferredHeight = 40;
+
+        var img = go.GetComponent<Image>();
+        img.color = new Color(panelColor.r * 2.4f, panelColor.g * 2.4f, panelColor.b * 2.4f, 0.9f);
+
+        var btn = go.GetComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(() => AskPreset(question));
+        _quickButtons.Add(btn);
+
+        var t = Text(go.transform, "Label", 22, TextAlignmentOptions.Center);
+        t.text = label;
+        Stretch(t.rectTransform);
+    }
+
+    /// <summary>
+    /// A guided-tour button "types" its question into the bar and submits it,
+    /// so presets and typed questions share one code path (and one lock).
+    /// </summary>
+    void AskPreset(string question)
+    {
+        if (_input == null || !_input.interactable) return;
+        _input.text = question;
+        Submit();
     }
 
     void Submit()
