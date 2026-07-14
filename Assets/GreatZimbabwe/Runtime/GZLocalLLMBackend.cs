@@ -201,7 +201,7 @@ public class GZLocalLLMBackend : GZNpcBackend
     /// narration. The command fires as soon as its line completes so the camera
     /// starts moving while the model is still talking.
     /// </summary>
-    class AnswerParser
+    internal class AnswerParser
     {
         readonly GZNpcRequest _req;
         readonly GZNpcCallbacks _cb;
