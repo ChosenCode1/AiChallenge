@@ -47,8 +47,9 @@ cannot do (understanding intent and composing an answer), and *not* for what it 
 
 ## Demo
 
-<!-- TODO after demo recording: add video link -->
-Demo video: *coming with final submission.*
+Demo video and full walkthrough script: **[docs/demo.md](docs/demo.md)** — every beat in
+the video can be re-run live; the demo questions are the same ones locked in the
+automated end-to-end suite.
 
 | Exploring | Asking the guide | Live LLM session |
 |---|---|---|
@@ -176,7 +177,7 @@ Honesty over polish — these are the current rough spots:
 - **Laptop-class device required** for the live guide (the model needs ~4 GB of RAM);
   scripted mode runs anywhere the Unity app runs.
 - **Two-part kiosk install** in live mode: the Unity app plus a local model server. Scripted
-  mode is a single app.
+  mode is a single app. Full offline/kiosk plan: [docs/deployment.md](docs/deployment.md).
 - **Latency is model-bound.** Answers stream token-by-token; speed depends on the host
   machine. Measured on our development machine: first words in ~2.1–2.4 s, then
   ~195–205 tokens/s ([verification transcript](docs/llm-e2e-verification.md)).
