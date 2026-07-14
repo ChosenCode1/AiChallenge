@@ -43,7 +43,7 @@ public static class GZTerrainBuilder
         }
     }
 
-    [MenuItem("Nhaka/Build Great Zimbabwe Terrain")]
+    [MenuItem("Tools/Great Zimbabwe/Build Terrain")]
     public static void Build()
     {
         string dataDir = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "greatZimData", "processed"));

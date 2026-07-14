@@ -68,7 +68,7 @@ Total runtime ≈ 12 s.
 ## Stage 2 — Unity terrain construction (`Assets/Editor/GZTerrainBuilder.cs`)
 
 Editor script [`GZTerrainBuilder.cs`](../Assets/Editor/GZTerrainBuilder.cs). Run from the
-menu **Nhaka → Build Great Zimbabwe Terrain**, or headless:
+menu **Tools → Great Zimbabwe → Build Terrain**, or headless:
 
 ```
 Unity.exe -batchmode -quit -projectPath "<repo>/My project" ^
