@@ -3,8 +3,7 @@
 This is the script behind the demo video, written so a judge can also **re-run every
 beat live** — nothing in the demo is staged beyond choosing which questions to ask.
 
-**Demo video:** *link pending — recording in progress, added before submission.*
-<!-- TODO: replace with the final video link -->
+**Demo video:** https://youtu.be/BH924KH2NIs
 
 Setup for a live re-run is the README's [Setup](../README.md#setup) section: open the
 project in Unity 6000.3.14f1, start LM Studio serving `gemma-4-e2b-it-qat` on
