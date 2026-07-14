@@ -47,7 +47,9 @@ cannot do (understanding intent and composing an answer), and *not* for what it 
 
 ## Demo
 
-Demo video and full walkthrough script: **[docs/demo.md](docs/demo.md)** — every beat in
+**▶ Watch the demo video: https://youtu.be/BH924KH2NIs**
+
+Full walkthrough script: **[docs/demo.md](docs/demo.md)** — every beat in
 the video can be re-run live; the demo questions are the same ones locked in the
 automated end-to-end suite.
 
