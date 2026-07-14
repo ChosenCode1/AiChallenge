@@ -75,8 +75,8 @@ as model input.
 ## 5. Rights and required attribution
 
 CC BY 4.0 permits copying, redistribution, and adaptation (including commercial use)
-provided attribution is given. The following credit line must appear in the application's
-credits screen and in the repository README:
+provided attribution is given. The following credit line appears in the repository README
+(§Attribution), which is the project's attribution record:
 
 > Terrain and aerial imagery: "Great Zimbabwe, DEM and orthophoto" by Daniel Löwenborg
 > and Ezekia Mtetwa (Uppsala University), Zenodo,

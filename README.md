@@ -208,3 +208,21 @@ and can explain all code in this repository.
 Code is released under the [MIT License](LICENSE). The knowledge base carries per-source
 licenses recorded in [Dataset/LICENSES.md](Dataset/LICENSES.md); terrain source data is
 CC BY 4.0 as documented in [docs/data-statement.md](docs/data-statement.md).
+
+## Attribution
+
+Terrain and aerial imagery: "Great Zimbabwe, DEM and orthophoto" by Daniel Löwenborg
+and Ezekia Mtetwa (Uppsala University), Zenodo,
+[doi:10.5281/zenodo.19093686](https://doi.org/10.5281/zenodo.19093686), licensed
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The data was cropped,
+hole-filled, resampled, and converted to a game-engine terrain; modifications are
+documented in [docs/method-terrain-from-dem.md](docs/method-terrain-from-dem.md).
+
+Historical information drawn from:
+
+- UNESCO World Heritage Centre — [Great Zimbabwe National Monument](https://whc.unesco.org/en/list/364/)
+- [Smarthistory — Great Zimbabwe](https://smarthistory.org/great-zimbabwe/), CC BY-NC-SA 4.0
+- Mark Cartwright / [World History Encyclopedia — Great Zimbabwe](https://www.worldhistory.org/Great_Zimbabwe/), CC BY-NC-SA 4.0
+- Lumen Learning via [LibreTexts — 11.5 Great Zimbabwe](https://human.libretexts.org/Bookshelves/History/World_History/Early_World_Civilizations_(Lumen)/11%3A_African_Civilizations/11.05%3A_Great_Zimbabwe), CC BY-SA 4.0
+
+Full per-source license details: [Dataset/LICENSES.md](Dataset/LICENSES.md).
