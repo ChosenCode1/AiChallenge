@@ -31,8 +31,10 @@ public class GZTourCamera : MonoBehaviour
     public float orbitSign = 1f;
 
     [Header("Quality floor (asset-friendly heights)")]
-    [Tooltip("Hard floor on orbit height above the focus ground, metres. No POI tuning or 'low'/'close' view hint can take the camera below this.")]
+    [Tooltip("Hard floor on orbit height above the focus ground, metres. No POI tuning or 'low'/'close' view hint can take the camera below this. Raised at Configure time so it is never more than maxDropBelowGrandTour below the grand-tour altitude.")]
     public float minAltitude = 70f;
+    [Tooltip("The camera may descend at most this fraction below the grand-tour (overview) orbit altitude. 0.3 = the floor is 70% of the grand tour height, everywhere, always.")]
+    [Range(0f, 1f)] public float maxDropBelowGrandTour = 0.3f;
     [Tooltip("Hard floor on terrain clearance everywhere (orbits and transits), metres. Overrides any smaller per-POI clearance.")]
     public float minClearanceFloor = 50f;
 
@@ -60,6 +62,12 @@ public class GZTourCamera : MonoBehaviour
         _overview = overview;
         _herd = herd;
         _terrain = Terrain.activeTerrain;
+        // Height floor is defined relative to the grand tour: the camera may drop
+        // at most maxDropBelowGrandTour below the overview orbit altitude. Raising
+        // minAltitude here means the per-frame Mathf.Max in LateUpdate enforces it
+        // for every POI, view hint, and altitudeBias value — nothing goes lower.
+        if (overview != null)
+            minAltitude = Mathf.Max(minAltitude, overview.altitude * (1f - Mathf.Clamp01(maxDropBelowGrandTour)));
         if (CurrentPoi == null && overview != null) FlyTo(overview, null, null);
     }
 

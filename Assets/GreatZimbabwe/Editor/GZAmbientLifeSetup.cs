@@ -127,14 +127,14 @@ public static class GZAmbientLifeSetup
             new Vector3(400f, 56f, 550f),
             new Vector3(430f, 66f, 650f),
         };
-        // 100 animals stays mobile-cheap because the coat shader GPU-instances:
+        // 120 animals stays mobile-cheap because the coat shader GPU-instances:
         // every body shares one instanced draw, every head another (plus the
-        // instanced shadow pass) instead of 200 individual draw calls.
-        herd.count = 100;
+        // instanced shadow pass) instead of 240 individual draw calls.
+        herd.count = 120;
         herd.lateralJitter = 12f;
         herd.placeholderMaterial = LoadOrCreateHerdMaterial();
         herd.RebuildAgents();
-        log.Append("Herd: 100 instanced agents on a 490 m valley route (assign agentPrefab to use real animals). | ");
+        log.Append("Herd: 120 instanced agents on a 490 m valley route (assign agentPrefab to use real animals). | ");
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);

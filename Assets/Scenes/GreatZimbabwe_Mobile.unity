@@ -3579,10 +3579,10 @@ MonoBehaviour:
   - {x: 400, y: 56, z: 550}
   - {x: 430, y: 66, z: 650}
   agentPrefab: {fileID: 0}
-  count: 9
+  count: 120
   minSpeed: 3.5
   maxSpeed: 5.5
-  lateralJitter: 6
+  lateralJitter: 12
   placeholderMaterial: {fileID: 2100000, guid: a46fdcc0ba95b5f4ea2001c73b1a6d4f, type: 2}
   seed: 4242
 --- !u!1 &834548536

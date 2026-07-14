@@ -84,7 +84,9 @@ public static class GZTourSetup
         // ---------------- POI catalogue ----------------
         // Anchors: ortho-UV zone centers from GZVegetationFlattener × terrain size.
         // Altitudes encode the quality rule: monuments viewed high and wide
-        // (photogrammetry never seen up close), cattle viewed low and tight.
+        // (photogrammetry never seen up close). Per-POI altitudes below the
+        // camera's grand-tour ratio floor (70% of the overview altitude — see
+        // GZTourCamera.maxDropBelowGrandTour) are clamped up to it at runtime.
         director.pois = new List<GZTourPOI>
         {
             Poi("overview", "Great Zimbabwe — Grand Tour", size, 0.487f, 0.390f,
