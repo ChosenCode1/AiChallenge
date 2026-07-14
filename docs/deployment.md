@@ -99,7 +99,7 @@ The deployment model was chosen so that the marginal cost of a visitor's questio
   usage caps. A kiosk that answers 50 questions a day costs the same as one that
   answers 5,000.
 - **No connectivity cost.** Heritage sites and rural classrooms with poor or no
-  coverage are the design target, not an edge case to apologize for.
+  coverage are the design target, not an afterthought to apologize for.
 - **One-time hardware.** A consumer-class PC in the 16 GB RAM range covers live mode;
   existing school or office machines cover scripted mode.
 - **Ongoing costs** are electricity and ordinary machine upkeep by whoever operates the

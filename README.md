@@ -155,8 +155,9 @@ A `GreatZimbabwe_Mobile` scene variant with pre-baked terrain targets lower-end 
 
 ## Tests
 
-- **Unity EditMode tests** (`Assets/GreatZimbabwe/Tests/`): fact-sheet loading and the FX
-  narration cue matcher. Run via *Window ▸ General ▸ Test Runner*, or headless:
+- **Unity EditMode tests** (`Assets/GreatZimbabwe/Tests/`, 24 tests): fact-sheet loading,
+  the FX narration cue matcher, and the streaming answer parser (steering-line extraction
+  and its fallback paths). Run via *Window ▸ General ▸ Test Runner*, or headless:
   `Unity -batchmode -projectPath . -runTests -testPlatform EditMode`.
 - **Provenance audit**: `py Dataset/audit_provenance.py` — the knowledge-base integrity suite.
 - **Live end-to-end verification**: `py Tools/e2e_llm_probe.py` (with the local server
@@ -182,7 +183,7 @@ Honesty over polish — these are the current rough spots:
   mode is a single app. Full offline/kiosk plan: [docs/deployment.md](docs/deployment.md).
 - **Latency is model-bound.** Answers stream token-by-token; speed depends on the host
   machine. Measured on our development machine: first words in ~2.1–2.4 s, then
-  ~195–205 tokens/s ([verification transcript](docs/llm-e2e-verification.md)).
+  ~165–205 tokens/s ([verification transcript](docs/llm-e2e-verification.md)).
 - Terrain fidelity is highest where published survey coverage is densest (Valley Complex);
   see the data statement for coverage details.
 

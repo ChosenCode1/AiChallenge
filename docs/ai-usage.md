@@ -120,8 +120,9 @@ only — Shona/Ndebele are roadmap items, not claims.
 - **Eval question set:** [`Dataset/qa/visitor-qa.md`](../Dataset/qa/visitor-qa.md) holds
   anticipated visitor questions with reference answers grounded in the chunks, used to
   spot-check the guide's answers against ground truth.
-- **Unit tests (automated):** Unity EditMode tests cover the fact-sheet loader and the
-  narration cue matcher (`Assets/GreatZimbabwe/Tests/`).
+- **Unit tests (automated):** Unity EditMode tests cover the fact-sheet loader, the
+  narration cue matcher, and the streaming answer parser that guards the steering
+  protocol (`Assets/GreatZimbabwe/Tests/`, 24 tests).
 - **Steering-protocol check:** the JSON steering line and its keyword fallback were tested
   against the live model server during development.
 - **Human oversight by construction:** the corpus is human-curated and human-audited; the

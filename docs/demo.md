@@ -71,7 +71,8 @@ predicted, which is exactly why the LLM mode exists.
 ### 8. Under the hood — the evidence trail (30 seconds)
 - `py Dataset/audit_provenance.py` — the knowledge-base integrity audit passing: every
   fact chunk traceable to a named, licensed source.
-- Unity Test Runner — 13/13 EditMode tests green.
+- Unity Test Runner — all 24 EditMode tests green. (The video, recorded just before the
+  answer-parser suite landed the same morning, shows the then-current 13.)
 - `py Tools/e2e_llm_probe.py` — the live end-to-end suite behind beats 2–6.
 
 ## Screenshot map

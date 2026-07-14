@@ -11,7 +11,18 @@ release train); each bullet corresponds to real commits in the history.
   costs.
 - `docs/demo.md` — demo walkthrough script with a reproduce-it-yourself guide for every
   beat, and the demo video link.
+- **EditMode tests for the streaming answer parser** (steering-line extraction, echo
+  filtering, glued-header recovery, fallback paths) — the suite is now 24 tests, verified
+  headless.
+- Demo camera polish and Mabwe product branding in the scene.
 - This changelog.
+
+### Changed
+- README: consolidated dataset attribution into one section and added a direct
+  demo-video link.
+- Consistency pass across docs before submission: README throughput corrected to the
+  measured 165–205 tokens/s, test references updated to the 24-test suite, and the
+  legacy "Nhaka" editor menu renamed to **Tools ▸ Great Zimbabwe ▸ Build Terrain**.
 
 ## 2026-07-13
 
